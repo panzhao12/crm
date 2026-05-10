@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacts CRM</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <span>LC</span>
+        <div>
+          <h1>Contacts CRM</h1>
+          <p id="status">Checking current tab...</p>
+        </div>
+      </header>
+
+      <label>
+        CRM URL
+        <input id="crmUrl" type="url" placeholder="https://yourname.github.io/linkedin/" />
+      </label>
+
+      <button id="saveSettings">Save URL</button>
+      <button id="addProfile" class="primary">Add current profile</button>
+      <button id="openCrm">Open CRM</button>
+
+      <p class="hint">This extension only sends the active profile URL. It does not read LinkedIn page content.</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Contacts CRM Companion",
+  "description": "Send the current LinkedIn profile URL to your contacts CRM without scraping LinkedIn.",
+  "version": "0.1.0",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["https://www.linkedin.com/*"],
+  "action": {
+    "default_title": "Add to Contacts CRM",
+    "default_popup": "popup.html"
+  }
+}
