@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useContactsStore } from '../../stores/contacts';
 import {
   getSession,
+  getAllowedEmail,
   hasSupabaseConfig,
   onAuthChange,
   signInWithPassword,
@@ -21,6 +22,7 @@ const authMode = ref<'sign-in' | 'sign-up'>('sign-in');
 const authLoading = ref(false);
 const signedInEmail = ref('');
 const usesSupabase = hasSupabaseConfig();
+const allowedEmail = getAllowedEmail();
 const showBulkImport = ref(false);
 const bulkUrls = ref('');
 const bulkGroup = ref('');
@@ -170,10 +172,23 @@ async function removeTag(tag: string): Promise<void> {
     <section class="auth-card">
       <span class="brand-mark">LC</span>
       <h1>LinkedIn Contacts CRM</h1>
-      <p>Sign in to sync your private groups, tags, and notes with Supabase.</p>
+      <p>
+        {{
+          allowedEmail
+            ? 'This private CRM only accepts the owner account.'
+            : 'Sign in to sync your private groups, tags, and notes with Supabase.'
+        }}
+      </p>
       <div class="segmented-control" role="tablist" aria-label="Authentication mode">
         <button :class="{ active: authMode === 'sign-in' }" type="button" @click="authMode = 'sign-in'">Sign in</button>
-        <button :class="{ active: authMode === 'sign-up' }" type="button" @click="authMode = 'sign-up'">Sign up</button>
+        <button
+          :class="{ active: authMode === 'sign-up' }"
+          type="button"
+          :disabled="Boolean(allowedEmail)"
+          @click="authMode = 'sign-up'"
+        >
+          Sign up
+        </button>
       </div>
       <form class="auth-form" @submit.prevent="submitAuth">
         <input v-model="authEmail" type="email" placeholder="you@example.com" />

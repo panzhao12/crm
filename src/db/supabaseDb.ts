@@ -10,6 +10,10 @@ export function hasSupabaseConfig(): boolean {
   return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
 }
 
+export function getAllowedEmail(): string {
+  return (import.meta.env.VITE_ALLOWED_EMAIL ?? '').trim().toLowerCase();
+}
+
 export function getClient(): SupabaseClient {
   if (!client) {
     client = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
@@ -36,6 +40,11 @@ export async function signInWithPassword(email: string, password: string): Promi
 }
 
 export async function signUpWithPassword(email: string, password: string): Promise<void> {
+  const allowedEmail = getAllowedEmail();
+  if (allowedEmail && email.trim().toLowerCase() !== allowedEmail) {
+    throw new Error('This CRM is private. Registration is limited to the owner account.');
+  }
+
   const { error } = await getClient().auth.signUp({
     email,
     password,
@@ -74,9 +83,17 @@ function fromDb(row: Record<string, unknown>): Contact {
   };
 }
 
-function toDb(contact: Contact): Record<string, unknown> {
+async function currentUserId(): Promise<string> {
+  const session = await getSession();
+  const userId = session?.user.id;
+  if (!userId) throw new Error('You must be signed in to save contacts.');
+  return userId;
+}
+
+async function toDb(contact: Contact): Promise<Record<string, unknown>> {
   return {
     id: contact.id,
+    user_id: await currentUserId(),
     first_name: contact.firstName,
     last_name: contact.lastName,
     name: contact.name,
@@ -104,13 +121,14 @@ export async function getAllContacts(): Promise<Contact[]> {
 }
 
 export async function saveContact(contact: Contact): Promise<void> {
-  const { error } = await getClient().from(TABLE).upsert(toDb(contact));
+  const { error } = await getClient().from(TABLE).upsert(await toDb(contact));
   if (error) throw error;
 }
 
 export async function saveContacts(contacts: Contact[]): Promise<void> {
   if (!contacts.length) return;
-  const { error } = await getClient().from(TABLE).upsert(contacts.map(toDb));
+  const rows = await Promise.all(contacts.map(toDb));
+  const { error } = await getClient().from(TABLE).upsert(rows);
   if (error) throw error;
 }
 
