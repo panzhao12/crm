@@ -12,6 +12,7 @@ create table if not exists public.contacts (
   location text not null default '',
   email text not null default '',
   profile_url text not null default '',
+  profile_image text not null default '',
   connected_on text not null default '',
   tags text[] not null default '{}',
   group_name text not null default '',

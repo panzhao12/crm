@@ -9,6 +9,7 @@ export type Contact = {
   location: string;
   email: string;
   profileUrl: string;
+  profileImage: string;
   connectedOn: string;
   tags: string[];
   group: string;
@@ -19,7 +20,7 @@ export type Contact = {
   updatedAt: string;
 };
 
-export type ContactPatch = Partial<Omit<Contact, 'id' | 'createdAt'>> & {
+export type ContactPatch = Partial<Omit<Contact, "id" | "createdAt">> & {
   id: string;
 };
 

@@ -1,28 +1,28 @@
-import type { Contact } from '../shared/types';
-import { normalizeLinkedInUrl } from '../shared/profileUrl';
+import type { Contact } from "../shared/types";
+import { normalizeLinkedInUrl } from "../shared/profileUrl";
 
 type CsvRow = Record<string, string>;
 
 const keyAliases: Record<string, string[]> = {
-  firstName: ['First Name', 'FirstName', 'First name'],
-  lastName: ['Last Name', 'LastName', 'Last name'],
-  email: ['Email Address', 'Email', 'Email address'],
-  company: ['Company'],
-  position: ['Position', 'Job Title', 'Title'],
-  profileUrl: ['URL', 'Profile URL', 'ProfileUrl', 'LinkedIn Profile'],
-  connectedOn: ['Connected On', 'ConnectedOn', 'Connected on'],
-  location: ['Location'],
-  headline: ['Headline']
+  firstName: ["First Name", "FirstName", "First name"],
+  lastName: ["Last Name", "LastName", "Last name"],
+  email: ["Email Address", "Email", "Email address"],
+  company: ["Company"],
+  position: ["Position", "Job Title", "Title"],
+  profileUrl: ["URL", "Profile URL", "ProfileUrl", "LinkedIn Profile"],
+  connectedOn: ["Connected On", "ConnectedOn", "Connected on"],
+  location: ["Location"],
+  headline: ["Headline"],
 };
 
 function read(row: CsvRow, key: keyof typeof keyAliases): string {
   const alias = keyAliases[key].find((name) => row[name] !== undefined);
-  return alias ? row[alias].trim() : '';
+  return alias ? row[alias].trim() : "";
 }
 
 export function parseCsv(text: string): CsvRow[] {
   const rows: string[][] = [];
-  let field = '';
+  let field = "";
   let row: string[] = [];
   let inQuotes = false;
 
@@ -35,13 +35,13 @@ export function parseCsv(text: string): CsvRow[] {
       index += 1;
     } else if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === "," && !inQuotes) {
       row.push(field);
-      field = '';
-    } else if ((char === '\n' || char === '\r') && !inQuotes) {
-      if (char === '\r' && next === '\n') index += 1;
+      field = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") index += 1;
       row.push(field);
-      field = '';
+      field = "";
       if (row.some((value) => value.trim())) rows.push(row);
       row = [];
     } else {
@@ -55,21 +55,22 @@ export function parseCsv(text: string): CsvRow[] {
   const headers = rows.shift()?.map((header) => header.trim()) ?? [];
   return rows.map((values) =>
     headers.reduce<CsvRow>((record, header, index) => {
-      record[header] = values[index] ?? '';
+      record[header] = values[index] ?? "";
       return record;
-    }, {})
+    }, {}),
   );
 }
 
 export function contactFromLinkedInRow(row: CsvRow): Contact | undefined {
-  const firstName = read(row, 'firstName');
-  const lastName = read(row, 'lastName');
-  const profileUrl = normalizeLinkedInUrl(read(row, 'profileUrl'));
-  const email = read(row, 'email');
-  const company = read(row, 'company');
-  const position = read(row, 'position');
-  const headline = read(row, 'headline') || [position, company].filter(Boolean).join(' at ');
-  const name = [firstName, lastName].filter(Boolean).join(' ').trim();
+  const firstName = read(row, "firstName");
+  const lastName = read(row, "lastName");
+  const profileUrl = normalizeLinkedInUrl(read(row, "profileUrl"));
+  const email = read(row, "email");
+  const company = read(row, "company");
+  const position = read(row, "position");
+  const headline =
+    read(row, "headline") || [position, company].filter(Boolean).join(" at ");
+  const name = [firstName, lastName].filter(Boolean).join(" ").trim();
 
   if (!name && !profileUrl && !email) return undefined;
 
@@ -78,40 +79,42 @@ export function contactFromLinkedInRow(row: CsvRow): Contact | undefined {
     id: crypto.randomUUID(),
     firstName,
     lastName,
-    name: name || email || profileUrl,
+    name: name || email || "",
     headline,
     company,
     position,
-    location: read(row, 'location'),
+    location: read(row, "location"),
     email,
     profileUrl,
-    connectedOn: read(row, 'connectedOn'),
+    profileImage: "",
+    connectedOn: read(row, "connectedOn"),
     tags: [],
-    group: '',
-    category: '',
-    notes: '',
-    nextFollowUp: '',
+    group: "",
+    category: "",
+    notes: "",
+    nextFollowUp: "",
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   };
 }
 
 export function toCsv(contacts: Contact[]): string {
   const headers = [
-    'Name',
-    'First Name',
-    'Last Name',
-    'Company',
-    'Position',
-    'Headline',
-    'Location',
-    'Email',
-    'Profile URL',
-    'Connected On',
-    'Group',
-    'Tags',
-    'Next Follow Up',
-    'Notes'
+    "Name",
+    "First Name",
+    "Last Name",
+    "Company",
+    "Position",
+    "Headline",
+    "Location",
+    "Email",
+    "Profile URL",
+    "Profile Image",
+    "Connected On",
+    "Group",
+    "Tags",
+    "Next Follow Up",
+    "Notes",
   ];
 
   const rows = contacts.map((contact) => [
@@ -124,11 +127,12 @@ export function toCsv(contacts: Contact[]): string {
     contact.location,
     contact.email,
     contact.profileUrl,
+    contact.profileImage,
     contact.connectedOn,
     contact.group || contact.category,
-    contact.tags.join('; '),
+    contact.tags.join("; "),
     contact.nextFollowUp,
-    contact.notes
+    contact.notes,
   ]);
 
   return [headers, ...rows]
@@ -138,7 +142,7 @@ export function toCsv(contacts: Contact[]): string {
           const escaped = value.replaceAll('"', '""');
           return /[",\n\r]/.test(escaped) ? `"${escaped}"` : escaped;
         })
-        .join(',')
+        .join(","),
     )
-    .join('\n');
+    .join("\n");
 }
