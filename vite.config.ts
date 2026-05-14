@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   plugins: [vue()],
-  base: "/crm/",
+  base: process.env.GITHUB_PAGES_BASE || "/",
   build: {
     outDir: "dist",
     emptyOutDir: true,

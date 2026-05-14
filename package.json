@@ -9,8 +9,9 @@
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
     "@supabase/supabase-js": "^2.75.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vitejs/plugin-vue": "^5.2.1",
     "pinia": "^2.3.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
